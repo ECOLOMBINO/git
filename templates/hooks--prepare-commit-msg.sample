@@ -9,8 +9,9 @@
 #
 # To enable this hook, rename this file to "prepare-commit-msg".
 
-# This hook includes three examples.  The first comments out the
-# "Conflicts:" part of a merge commit.
+# This hook includes three examples.  The first one removes three
+# comment lines starting from the line that has the words
+# "# Please enter the" in it's beginning.
 #
 # The second includes the output of "git diff --name-status -r"
 # into the message, just before the "git status" output.  It is
@@ -20,17 +21,30 @@
 # The third example adds a Signed-off-by line to the message, that can
 # still be edited.  This is rarely a good idea.
 
-case "$2,$3" in
-  merge,)
-    @PERL_PATH@ -i.bak -ne 's/^/# /, s/^# #/#/ if /^Conflicts/ .. /#/; print' "$1" ;;
+COMMIT_MSG_FILE=$1
+COMMIT_SOURCE=$2
+SHA1=$3
 
+SED_OUTPUT_TEMP='.sed-output-temp'
+sed -e '/^. Please enter the commit message /,/^#$/d' "$COMMIT_MSG_FILE" >"$SED_OUTPUT_TEMP" && mv "$SED_OUTPUT_TEMP" "$1"
+
+# case "$2,$3" in
 # ,|template,)
 #   @PERL_PATH@ -i.bak -pe '
 #      print "\n" . `git diff --cached --name-status -r`
 #	 if /^#/ && $first++ == 0' "$1" ;;
+#
+#  *) ;;
+# esac
 
-  *) ;;
-esac
-
+# TEMP_FILE='.template-temp'
 # SOB=$(git var GIT_AUTHOR_IDENT | sed -n 's/^\(.*>\).*$/Signed-off-by: \1/p')
-# grep -qs "^$SOB" "$1" || echo "$SOB" >> "$1"
+# git interpret-trailers --in-place --trailer "$SOB" "$COMMIT_MSG_FILE"
+# if test -z "$COMMIT_SOURCE"
+# then
+#   {
+#     echo
+#     cat "$COMMIT_MSG_FILE"
+#   } >"$TEMP_FILE"
+#   mv "$TEMP_FILE" "$COMMIT_MSG_FILE"
+# fi
