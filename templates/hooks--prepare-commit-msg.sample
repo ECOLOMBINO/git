@@ -21,7 +21,12 @@
 # The third example adds a Signed-off-by line to the message, that can
 # still be edited.  This is rarely a good idea.
 
-sed -e '/^. Please enter the commit message /,/^#$/d' "$1" >'.sed-output.temp' && mv '.sed-output.temp' "$1"
+COMMIT_MSG_FILE=$1
+COMMIT_SOURCE=$2
+SHA1=$3
+
+SED_OUTPUT_TEMP='.sed-output-temp'
+sed -e '/^. Please enter the commit message /,/^#$/d' "$COMMIT_MSG_FILE" >"$SED_OUTPUT_TEMP" && mv "$SED_OUTPUT_TEMP" "$1"
 
 # case "$2,$3" in
 # ,|template,)
@@ -32,5 +37,14 @@ sed -e '/^. Please enter the commit message /,/^#$/d' "$1" >'.sed-output.temp' &
 #  *) ;;
 # esac
 
+# TEMP_FILE='.template-temp'
 # SOB=$(git var GIT_AUTHOR_IDENT | sed -n 's/^\(.*>\).*$/Signed-off-by: \1/p')
-# grep -qs "^$SOB" "$1" || echo "$SOB" >> "$1"
+# git interpret-trailers --in-place --trailer "$SOB" "$COMMIT_MSG_FILE"
+# if test -z "$COMMIT_SOURCE"
+# then
+#   {
+#     echo
+#     cat "$COMMIT_MSG_FILE"
+#   } >"$TEMP_FILE"
+#   mv "$TEMP_FILE" "$COMMIT_MSG_FILE"
+# fi
